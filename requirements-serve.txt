@@ -1,0 +1,12 @@
+# Lean Serving Dependencies for Heart Disease API Container
+# AIML ZG523 - MLOps Assignment 1
+
+fastapi>=0.110.0
+uvicorn>=0.28.0
+pydantic>=2.6.0
+scikit-learn>=1.4.0
+pandas>=2.2.0
+numpy>=1.26.0
+joblib>=1.3.0
+prometheus_client>=0.20.0
+cloudpickle>=3.0.0

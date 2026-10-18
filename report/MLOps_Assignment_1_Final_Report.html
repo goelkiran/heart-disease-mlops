@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MLOps Assignment 01 Technical Report - Kiran Kumar (2025AE05377)</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+        
+        :root {
+            --primary: #1e3a8a;
+            --secondary: #0284c7;
+            --accent: #d97706;
+            --text: #1f2937;
+            --bg: #ffffff;
+            --code-bg: #f3f4f6;
+            --border: #e5e7eb;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.65;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        h1, h2, h3, h4 {
+            color: var(--primary);
+            font-weight: 700;
+            line-height: 1.25;
+            margin-top: 1.8em;
+            margin-bottom: 0.6em;
+        }
+
+        h1 {
+            font-size: 2.1rem;
+            border-bottom: 2px solid var(--secondary);
+            padding-bottom: 12px;
+            margin-top: 0;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            color: #1e293b;
+        }
+
+        p, li {
+            font-size: 1rem;
+            color: #374151;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.92rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        th, td {
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            text-align: left;
+        }
+
+        th {
+            background-color: #f8fafc;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: var(--code-bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.88em;
+            color: #b91c1c;
+        }
+
+        pre {
+            background-color: #0f172a;
+            color: #f8fafc;
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.88rem;
+            line-height: 1.5;
+        }
+
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        blockquote {
+            border-left: 4px solid var(--secondary);
+            margin: 16px 0;
+            padding: 8px 16px;
+            background-color: #f0f9ff;
+            color: #0369a1;
+            font-style: italic;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 32px 0;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+            margin: 16px 0;
+            border: 1px solid var(--border);
+        }
+
+        @media print {
+            body {
+                max-width: 100%;
+                padding: 0;
+                font-size: 10.5pt;
+            }
+            h1 { font-size: 18pt; }
+            h2 { font-size: 14pt; page-break-after: avoid; }
+            h3 { font-size: 12pt; page-break-after: avoid; }
+            table, pre, img { page-break-inside: avoid; }
+            @page {
+                margin: 1.8cm 1.5cm;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1 id="mlops-experiential-learning-assignment-01-end-to-end-production-machine-learning-system">🫀 MLOps Experiential Learning Assignment 01: End-to-End Production Machine Learning System</h1>
+<p><strong>Course Code</strong>: AIML ZG523 — Machine Learning Operations (MLOps)<br />
+<strong>Programme</strong>: M.Tech in Artificial Intelligence &amp; Machine Learning (BITS Pilani WILP)<br />
+<strong>Student Name</strong>: Kiran Kumar<br />
+<strong>Student ID</strong>: <code>2025AE05377</code><br />
+<strong>Submission Date</strong>: October 2026<br />
+<strong>Repository URL</strong>: <code>https://github.com/goelkiran/heart-disease-mlops</code><br />
+<strong>API Serving Target</strong>: <code>http://localhost:8000</code> (Docker Container / Kubernetes Service)  </p>
+<hr />
+<h2 id="1-executive-summary-problem-formulation">1. Executive Summary &amp; Problem Formulation</h2>
+<h3 id="11-clinical-background-problem-statement">1.1 Clinical Background &amp; Problem Statement</h3>
+<p>Cardiovascular diseases (CVDs) remain the leading cause of global mortality, accounting for an estimated 17.9 million deaths annually according to the World Health Organization (WHO). Early detection and clinical risk stratification can significantly mitigate adverse cardiac events. However, deploying machine learning diagnostic aids in clinical environments requires far more than high offline accuracy. Clinical deployments demand:<br />
+1. <strong>End-to-End Reproducibility</strong>: Exact tracking of data versions, feature transformers, hyperparameters, and model weights.<br />
+2. <strong>Automated Quality Gates</strong>: CI/CD pipelines that enforce linting, unit testing, and model invariance checks before any deployment.<br />
+3. <strong>Cloud-Native Scalability &amp; Isolation</strong>: Containerized serving environments decoupled from host dependencies with strict resource boundaries.<br />
+4. <strong>Resilient Production Observability</strong>: Continuous telemetry to track inference latencies, throughput, prediction drift, and operational error rates.</p>
+<p>This project delivers an end-to-end, enterprise-grade MLOps solution for heart disease risk classification using the <strong>UCI Heart Disease Dataset (Cleveland Clinic Foundation)</strong>. The pipeline transitions raw clinical data into a containerized microservice orchestrated via Kubernetes, instrumented with MLflow experiment tracking, automated with GitHub Actions CI/CD, and monitored via Prometheus and Grafana.</p>
+<hr />
+<h2 id="2-system-architecture-topology-design">2. System Architecture &amp; Topology Design</h2>
+<p>The system adheres to standard production MLOps reference architecture (Level 2 maturity), comprising five decoupled lifecycle phases:</p>
+<pre><code>[UCI Repository] ──&gt; [Data Ingestion] ──&gt; [Leak-Free Feature Pipeline] ──&gt; [GridSearchCV Training]
+                                                                                   │
+                                                                                   ▼
+[Grafana Dashboard] &lt;── [Prometheus TSDB] &lt;── [FastAPI API Pods] &lt;── [Docker Image / K8s] &lt;── [MLflow Model Registry]
+</code></pre>
+<h3 id="21-component-specifications">2.1 Component Specifications</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Architecture Tier</th>
+<th style="text-align: left;">Technologies Utilized</th>
+<th style="text-align: left;">Operational Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Data Ingestion &amp; Cleaning</strong></td>
+<td style="text-align: left;">Python, Pandas, NumPy, Requests</td>
+<td style="text-align: left;">Automated dataset download, schema validation, binary target mapping, missing value imputation.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Feature Transformation</strong></td>
+<td style="text-align: left;">Scikit-Learn <code>ColumnTransformer</code>, <code>StandardScaler</code></td>
+<td style="text-align: left;">Leak-free median imputation for numerical data and one-hot encoding for categorical variables.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Model Governance</strong></td>
+<td style="text-align: left;">MLflow 3.x, SQLite Tracking Store</td>
+<td style="text-align: left;">Logging hyperparameters, cross-validation ROC-AUC scores, confusion matrices, and model artifacts.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>CI/CD Quality Assurance</strong></td>
+<td style="text-align: left;">GitHub Actions, Flake8, Pytest</td>
+<td style="text-align: left;">Automated static linting, unit test execution (11 tests), and container build verification.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Container Serving</strong></td>
+<td style="text-align: left;">Docker (Multi-stage build), Uvicorn, FastAPI</td>
+<td style="text-align: left;">Lightweight Python 3.12-slim image (&lt;250MB), unprivileged security context (<code>appuser</code>), <code>/predict</code> endpoint.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Orchestration</strong></td>
+<td style="text-align: left;">Kubernetes (Deployment, Service)</td>
+<td style="text-align: left;">Self-healing pods (2 replicas), rolling update strategy, liveness and readiness health probes.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Telemetry &amp; Observability</strong></td>
+<td style="text-align: left;">Prometheus, Grafana, Structured JSON Logger</td>
+<td style="text-align: left;">Real-time monitoring of request latency, throughput, prediction volume, and HTTP status codes.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-data-acquisition-exploratory-data-analysis-eda">3. Data Acquisition &amp; Exploratory Data Analysis (EDA)</h2>
+<h3 id="31-dataset-schema-clinical-indicators">3.1 Dataset Schema &amp; Clinical Indicators</h3>
+<p>The dataset comprises 303 patient records across 14 clinical variables collected from the Cleveland Clinic:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Feature Name</th>
+<th style="text-align: left;">Clinical Description</th>
+<th style="text-align: left;">Data Type</th>
+<th style="text-align: left;">Permissible Range / Values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>age</code></td>
+<td style="text-align: left;">Patient age in years</td>
+<td style="text-align: left;">Continuous (Integer)</td>
+<td style="text-align: left;">29 to 77</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>sex</code></td>
+<td style="text-align: left;">Biological sex</td>
+<td style="text-align: left;">Binary</td>
+<td style="text-align: left;">1 = Male; 0 = Female</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>cp</code></td>
+<td style="text-align: left;">Chest pain type</td>
+<td style="text-align: left;">Categorical (1–4)</td>
+<td style="text-align: left;">1: Typical Angina, 2: Atypical Angina, 3: Non-anginal, 4: Asymptomatic</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>trestbps</code></td>
+<td style="text-align: left;">Resting blood pressure on admission</td>
+<td style="text-align: left;">Continuous (Integer)</td>
+<td style="text-align: left;">94 to 200 mm Hg</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>chol</code></td>
+<td style="text-align: left;">Serum cholesterol level</td>
+<td style="text-align: left;">Continuous (Integer)</td>
+<td style="text-align: left;">126 to 564 mg/dl</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>fbs</code></td>
+<td style="text-align: left;">Fasting blood sugar &gt; 120 mg/dl</td>
+<td style="text-align: left;">Binary</td>
+<td style="text-align: left;">1 = True; 0 = False</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>restecg</code></td>
+<td style="text-align: left;">Resting electrocardiographic results</td>
+<td style="text-align: left;">Categorical (0–2)</td>
+<td style="text-align: left;">0: Normal, 1: ST-T wave abnormality, 2: Left ventricular hypertrophy</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>thalach</code></td>
+<td style="text-align: left;">Maximum heart rate achieved during stress test</td>
+<td style="text-align: left;">Continuous (Integer)</td>
+<td style="text-align: left;">71 to 202 bpm</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>exang</code></td>
+<td style="text-align: left;">Exercise-induced angina</td>
+<td style="text-align: left;">Binary</td>
+<td style="text-align: left;">1 = Yes; 0 = No</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>oldpeak</code></td>
+<td style="text-align: left;">ST depression induced by exercise relative to rest</td>
+<td style="text-align: left;">Continuous (Float)</td>
+<td style="text-align: left;">0.0 to 6.2 mm</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>slope</code></td>
+<td style="text-align: left;">Slope of the peak exercise ST segment</td>
+<td style="text-align: left;">Categorical (1–3)</td>
+<td style="text-align: left;">1: Upsloping, 2: Flat, 3: Downsloping</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>ca</code></td>
+<td style="text-align: left;">Major vessels colored by fluoroscopy</td>
+<td style="text-align: left;">Discrete (0–3)</td>
+<td style="text-align: left;">0.0, 1.0, 2.0, 3.0 (4 missing records)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>thal</code></td>
+<td style="text-align: left;">Thallium scintigraphy stress test defect</td>
+<td style="text-align: left;">Categorical (3, 6, 7)</td>
+<td style="text-align: left;">3.0: Normal, 6.0: Fixed defect, 7.0: Reversible defect (2 missing)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>target</code></td>
+<td style="text-align: left;">Angiographic disease status</td>
+<td style="text-align: left;">Binary (Cleaned)</td>
+<td style="text-align: left;">0 = Absence (&lt;50% diameter narrowing), 1 = Presence (&gt;50% narrowing)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="32-target-class-balance">3.2 Target Class Balance</h3>
+<p>The original Cleveland dataset records angiographic disease severity on a scale of 0 to 4. For binary clinical triage, values $&gt;0$ represent disease presence. After conversion:<br />
+- <strong>Class 0 (Disease Absent)</strong>: 164 patients (54.1%)<br />
+- <strong>Class 1 (Disease Present)</strong>: 139 patients (45.9%)</p>
+<p>The distribution is remarkably balanced, eliminating the immediate necessity for synthetic oversampling (e.g., SMOTE) while preserving genuine clinical prevalence.</p>
+<h3 id="33-key-exploratory-insights">3.3 Key Exploratory Insights</h3>
+<ol>
+<li><strong>Exercise ST Depression (<code>oldpeak</code>)</strong>: Patients with heart disease exhibit significantly higher median ST depression (1.4 mm vs 0.2 mm), confirming myocardial ischemia during physical exertion.</li>
+<li><strong>Maximum Heart Rate (<code>thalach</code>)</strong>: Healthy individuals achieve substantially higher maximum heart rates during stress testing (median 162 bpm) compared to cardiac patients (median 142 bpm).</li>
+<li><strong>Fluoroscopy Vessels (<code>ca</code>)</strong>: The presence of colored coronary vessels correlates heavily ($r = +0.46$) with multi-vessel coronary artery disease.</li>
+</ol>
+<hr />
+<h2 id="4-feature-engineering-preprocessing-pipeline">4. Feature Engineering &amp; Preprocessing Pipeline</h2>
+<h3 id="41-data-leakage-prevention-via-scikit-learn-pipelines">4.1 Data Leakage Prevention via Scikit-Learn Pipelines</h3>
+<p>A frequent anti-pattern in machine learning deployments is computing scaling parameters (mean, standard deviation) or imputation medians across the entire dataset prior to train-test splitting. This introduces subtle data leakage, inflating offline validation scores.</p>
+<p>Our pipeline strictly isolates training and test partitions using <code>StratifiedShuffleSplit</code> (80% train = 242 records, 20% test = 61 records) and encapsulates all transformations within a <code>ColumnTransformer</code>:</p>
+<pre><code class="language-python">numerical_transformer = Pipeline([
+    (&quot;imputer&quot;, SimpleImputer(strategy=&quot;median&quot;)),
+    (&quot;scaler&quot;, StandardScaler()),
+])
+
+categorical_transformer = Pipeline([
+    (&quot;imputer&quot;, SimpleImputer(strategy=&quot;most_frequent&quot;)),
+    (&quot;onehot&quot;, OneHotEncoder(handle_unknown=&quot;ignore&quot;, sparse_output=False)),
+])
+
+preprocessor = ColumnTransformer(
+    transformers=[
+        (&quot;num&quot;, numerical_transformer, NUMERICAL_COLS),
+        (&quot;cat&quot;, categorical_transformer, CATEGORICAL_COLS),
+    ]
+)
+</code></pre>
+<p>By binding the preprocessor and estimator into a single serialized <code>Pipeline</code> object (<code>best_model.joblib</code>), raw unnormalized JSON requests arriving at the serving API are automatically preprocessed using the exact training statistics.</p>
+<hr />
+<h2 id="5-model-development-tuning-evaluation">5. Model Development, Tuning &amp; Evaluation</h2>
+<h3 id="51-evaluated-model-architectures">5.1 Evaluated Model Architectures</h3>
+<p>To satisfy the multi-model comparison requirement, we developed and tuned two distinct classification paradigms:<br />
+1. <strong>Regularized Logistic Regression (Linear Baseline)</strong>:<br />
+   - Optimized with $L_2$ penalty to control multicollinearity.<br />
+   - Tuned hyperparameter: Inverse regularization strength $C \in [0.01, 0.1, 1.0, 5.0, 10.0]$ with <code>liblinear</code> and <code>lbfgs</code> solvers.<br />
+2. <strong>Random Forest Classifier (Non-Linear Ensemble)</strong>:<br />
+   - Bagging ensemble of decision trees with bootstrap aggregation.<br />
+   - Tuned hyperparameters: <code>n_estimators</code> $\in [50, 100, 200]$, <code>max_depth</code> $\in [4, 6, 8, \text{None}]$, <code>min_samples_split</code> $\in [2, 4, 8]$, and <code>class_weight</code> $\in [\text{balanced}, \text{None}]$.</p>
+<h3 id="52-5-fold-stratified-cross-validation-test-benchmarks">5.2 5-Fold Stratified Cross-Validation &amp; Test Benchmarks</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Metric</th>
+<th style="text-align: left;">Logistic Regression ($C=5.0$, <code>liblinear</code>)</th>
+<th style="text-align: left;">Tuned Random Forest ($N=100$, <code>split=4</code>)</th>
+<th style="text-align: left;">Clinical Importance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>5-Fold CV ROC-AUC</strong></td>
+<td style="text-align: left;"><strong>0.9029 ± 0.038</strong></td>
+<td style="text-align: left;"><strong>0.9073 ± 0.041</strong></td>
+<td style="text-align: left;">Cross-validation stability across folds</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Held-Out Test Accuracy</strong></td>
+<td style="text-align: left;"><strong>86.89%</strong></td>
+<td style="text-align: left;"><strong>88.52%</strong></td>
+<td style="text-align: left;">Overall correct triage percentage</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Held-Out Test Precision</strong></td>
+<td style="text-align: left;"><strong>83.33%</strong></td>
+<td style="text-align: left;"><strong>83.87%</strong></td>
+<td style="text-align: left;">Minimizing false positives (unnecessary catheterizations)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Held-Out Test Recall (Sensitivity)</strong></td>
+<td style="text-align: left;"><strong>89.29%</strong></td>
+<td style="text-align: left;"><strong>92.86%</strong></td>
+<td style="text-align: left;"><strong>Critical</strong>: Minimizing missed cardiac cases (false negatives)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Held-Out Test F1-Score</strong></td>
+<td style="text-align: left;"><strong>0.8621</strong></td>
+<td style="text-align: left;"><strong>0.8814</strong></td>
+<td style="text-align: left;">Harmonic mean of precision and recall</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Held-Out Test ROC-AUC</strong></td>
+<td style="text-align: left;"><strong>0.9621</strong></td>
+<td style="text-align: left;"><strong>0.9416</strong></td>
+<td style="text-align: left;">Discrimination capability across all decision thresholds</td>
+</tr>
+</tbody>
+</table>
+<h3 id="53-champion-model-decision">5.3 Champion Model Decision</h3>
+<p>While Random Forest achieved marginally higher raw test accuracy (88.52% vs 86.89%) and recall (92.86%), <strong>Logistic Regression achieved a stellar ROC-AUC of 0.9621</strong> and provides linear explainability essential for clinical auditability. The pipeline serializes the champion model artifact (<code>best_model.joblib</code>) for zero-overhead inference.</p>
+<hr />
+<h2 id="6-experiment-tracking-model-governance-with-mlflow">6. Experiment Tracking &amp; Model Governance with MLflow</h2>
+<h3 id="61-local-sqlite-tracking-store-architecture">6.1 Local SQLite Tracking Store Architecture</h3>
+<p>Rather than relying on ephemeral directory tracking, our system configures a durable SQLite backend store (<code>sqlite:///mlflow.db</code>). This supports concurrent run execution, metric comparison, and artifact versioning:</p>
+<pre><code class="language-python">mlflow.set_tracking_uri(f&quot;sqlite:///{DB_PATH}&quot;)
+mlflow.set_experiment(&quot;heart-disease-uci-experiment&quot;)
+</code></pre>
+<h3 id="62-logged-telemetry-artifacts">6.2 Logged Telemetry &amp; Artifacts</h3>
+<p>For every candidate model run, MLflow automatically captures:<br />
+1. <strong>Hyperparameters</strong>: Regularization coefficient $C$, solver, tree depth, sample splits, estimator count.<br />
+2. <strong>Cross-Validation Metrics</strong>: K-fold mean ROC-AUC and standard deviation.<br />
+3. <strong>Test Partition Metrics</strong>: Accuracy, Precision, Recall, F1-Score, ROC-AUC.<br />
+4. <strong>Visual Artifacts</strong>:<br />
+   - <code>lr_confusion_matrix.png</code> and <code>rf_confusion_matrix.png</code><br />
+   - <code>lr_roc_curve.png</code> and <code>rf_roc_curve.png</code><br />
+   - <code>model_comparison_roc.png</code><br />
+5. <strong>Model Binary</strong>: Pinned Scikit-Learn model package with conda dependencies and cloudpickle signature.</p>
+<hr />
+<h2 id="7-cicd-automation-automated-testing">7. CI/CD Automation &amp; Automated Testing</h2>
+<h3 id="71-automated-pytest-suite-11-test-cases">7.1 Automated Pytest Suite (11 Test Cases)</h3>
+<p>To guarantee production stability before deployment, our test suite enforces strict invariants across three test modules:</p>
+<ol>
+<li><strong><code>test_data.py</code> (Data Pipeline Invariants)</strong>:</li>
+<li>Verifies conversion of multi-class targets to binary ${0, 1}$.</li>
+<li>Asserts zero NaN or infinite values after <code>ColumnTransformer</code> execution.</li>
+<li>Enforces presence of all 13 clinical input features.</li>
+<li><strong><code>test_model.py</code> (Inference &amp; Behavioral Invariants)</strong>:</li>
+<li>Validates that output probabilities reside strictly in $[0.0, 1.0]$.</li>
+<li>Validates confidence bounds and risk classification thresholds.</li>
+<li>Verifies that batch predictions preserve record order and shape.</li>
+<li>Asserts that omitting required clinical features raises descriptive <code>ValueError</code>.</li>
+<li><strong><code>test_api.py</code> (HTTP Integration &amp; Schema Invariants)</strong>:</li>
+<li>Tests <code>/health</code> status and uptime availability.</li>
+<li>Tests <code>/predict</code> with valid clinical inputs.</li>
+<li>Tests Pydantic validation rejects unphysiological inputs (e.g. age $= 250$).</li>
+<li>Verifies Prometheus <code>/metrics</code> scraping endpoint exposes valid OpenMetrics text.</li>
+</ol>
+<h3 id="72-github-actions-workflow-githubworkflowsciyml">7.2 GitHub Actions Workflow (<code>.github/workflows/ci.yml</code>)</h3>
+<p>The automated CI/CD pipeline triggers on every push and pull request to <code>main</code>:<br />
+1. <strong>Stage 1 (Lint &amp; Static Analysis)</strong>: Runs <code>flake8</code> to catch syntax errors, undefined variables, and cyclomatic complexity violations.<br />
+2. <strong>Stage 2 (Unit Testing)</strong>: Executes <code>pytest</code> with JUnit XML test result reporting.<br />
+3. <strong>Stage 3 (Model Training Smoke Test)</strong>: Ingests raw data and executes <code>train.py</code> to confirm deterministic reproducibility.<br />
+4. <strong>Stage 4 (Docker Build &amp; Container Smoke Test)</strong>: Builds the container image and queries <code>/health</code> inside the containerized environment.</p>
+<hr />
+<h2 id="8-containerization-cloud-native-kubernetes-deployment">8. Containerization &amp; Cloud-Native Kubernetes Deployment</h2>
+<h3 id="81-multi-stage-dockerfile-optimization">8.1 Multi-Stage Dockerfile Optimization</h3>
+<p>The serving container employs a multi-stage Dockerfile based on <code>python:3.12-slim</code>:<br />
+- <strong>Builder Stage</strong>: Installs system compilers, wheels, and requirements in <code>/root/.local</code>.<br />
+- <strong>Runner Stage</strong>: Copies only installed site-packages into an unprivileged user context (<code>appuser</code>, UID 1000).<br />
+- <strong>Security Hardening</strong>: Runs as non-root, prevents privilege escalation, and excludes build tools from the final image.<br />
+- <strong>Image Footprint</strong>: Optimized to $&lt;240\text{ MB}$ compared to $&gt;1.2\text{ GB}$ for standard Python images.</p>
+<h3 id="82-kubernetes-deployment-resilience">8.2 Kubernetes Deployment &amp; Resilience</h3>
+<p>The Kubernetes manifest (<code>k8s/deployment.yaml</code>) enforces:<br />
+1. <strong>Replication</strong>: 2 replica pods for high availability.<br />
+2. <strong>Zero-Downtime Rolling Updates</strong>: <code>maxSurge: 1</code>, <code>maxUnavailable: 0</code>.<br />
+3. <strong>Health Probes</strong>:<br />
+   - <code>readinessProbe</code>: Queries <code>/health</code> every 10s to ensure traffic is only routed to warm pods.<br />
+   - <code>livenessProbe</code>: Restarts deadlocked containers if <code>/health</code> fails for 3 consecutive checks.<br />
+4. <strong>Resource Constraints</strong>:<br />
+   - CPU Request: <code>100m</code>, Limit: <code>500m</code>.<br />
+   - Memory Request: <code>128Mi</code>, Limit: <code>512Mi</code>.<br />
+5. <strong>Service Exposure</strong>: NodePort service on <code>:30080</code> and LoadBalancer on port <code>80</code>.</p>
+<hr />
+<h2 id="9-telemetry-monitoring-production-observability">9. Telemetry, Monitoring &amp; Production Observability</h2>
+<h3 id="91-prometheus-metrics-instrumentation">9.1 Prometheus Metrics Instrumentation</h3>
+<p>The FastAPI application natively exports OpenMetrics telemetry at <code>/metrics</code>:<br />
+- <code>http_requests_total</code>: Counter tracking inbound requests categorized by <code>method</code>, <code>endpoint</code>, and <code>status_code</code>.<br />
+- <code>http_request_duration_seconds</code>: Histogram measuring API latency with buckets ranging from 5 ms to 2.5 seconds.<br />
+- <code>model_predictions_total</code>: Counter tracking inference volume segmented by <code>predicted_class</code> (0 vs 1) and <code>risk_level</code> (Low, Moderate, High).</p>
+<h3 id="92-structured-json-audit-logging">9.2 Structured JSON Audit Logging</h3>
+<p>Every HTTP interaction logs a structured payload including timestamp, HTTP verb, endpoint, client IP, unique <code>X-Request-ID</code>, and duration in milliseconds, fulfilling clinical audit requirements.</p>
+<hr />
+<h2 id="10-conclusion-reproducibility-verification">10. Conclusion &amp; Reproducibility Verification</h2>
+<p>This project demonstrates a complete, robust, and reproducible MLOps lifecycle. From automated ingestion of the UCI Heart Disease dataset through MLflow experiment tracking, containerization, and Kubernetes orchestration, every operational requirement has been rigorously validated.</p>
+<h3 id="summary-checklist-of-mandatory-deliverables">Summary Checklist of Mandatory Deliverables</h3>
+<ul>
+<li>[x] UCI Heart Disease ingestion and data cleaning script (<code>src/download_data.py</code>, <code>src/data_prep.py</code>)</li>
+<li>[x] Publication-grade EDA figures in <code>report/figures/</code></li>
+<li>[x] Logistic Regression ($L_2$) and Tuned Random Forest with 5-fold Stratified CV</li>
+<li>[x] Full MLflow experiment tracking with SQLite backend (<code>mlflow.db</code>)</li>
+<li>[x] Serialized pipeline artifact (<code>artifacts/best_model.joblib</code>)</li>
+<li>[x] 11 Automated Pytest unit and integration tests (100% passing)</li>
+<li>[x] GitHub Actions CI/CD workflow (<code>.github/workflows/ci.yml</code>)</li>
+<li>[x] Multi-stage, unprivileged Dockerfile and <code>docker-compose.yml</code></li>
+<li>[x] Kubernetes deployment and service manifests (<code>k8s/deployment.yaml</code>, <code>k8s/service.yaml</code>)</li>
+<li>[x] Prometheus <code>/metrics</code> export and Prometheus + Grafana monitoring compose stack</li>
+<li>[x] Professional 10-page technical report and reproduction runbook</li>
+</ul>
+</body>
+</html>

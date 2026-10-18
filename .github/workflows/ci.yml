@@ -1,0 +1,115 @@
+name: MLOps End-to-End CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  lint-and-test:
+    name: Code Quality and Unit Testing
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Lint Code with Flake8
+        run: |
+          # Stop build if there are Python syntax errors or undefined names
+          flake8 src tests --count --select=E9,F63,F7,F82 --show-source --statistics
+          # Warning check for complexity and line-length
+          flake8 src tests --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+      - name: Execute Automated Pytest Suite
+        run: |
+          pytest tests/ -v --junitxml=pytest-results.xml
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-execution-report
+          path: pytest-results.xml
+
+  model-training-and-validation:
+    name: Automated Data & Model Training Pipeline
+    runs-on: ubuntu-latest
+    needs: lint-and-test
+    steps:
+      - name: Checkout Code Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Ingest Raw UCI Dataset
+        run: |
+          python src/download_data.py
+
+      - name: Execute Model Training and Experiment Tracking
+        run: |
+          python src/train.py
+
+      - name: Archive Trained Model Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: trained-model-artifacts
+          path: |
+            artifacts/best_model.joblib
+            artifacts/model_metadata.json
+            report/figures/*.png
+
+  docker-build-and-verify:
+    name: Container Build and Smoke Verification
+    runs-on: ubuntu-latest
+    needs: model-training-and-validation
+    steps:
+      - name: Checkout Code Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12 & Train Model for Container
+        run: |
+          pip install -r requirements.txt
+          python src/download_data.py
+          python src/train.py
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker Serving Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: heart-disease-api:latest
+          load: true
+
+      - name: Test Container Serving & Healthcheck
+        run: |
+          docker run -d --name test-api -p 8000:8000 heart-disease-api:latest
+          sleep 5
+          docker ps
+          curl -f http://localhost:8000/health || (docker logs test-api && exit 1)
+          docker stop test-api

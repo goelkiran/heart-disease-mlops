@@ -1,0 +1,39 @@
+{
+    "champion_model": "LogisticRegression",
+    "feature_columns": [
+        "age",
+        "trestbps",
+        "chol",
+        "thalach",
+        "oldpeak",
+        "sex",
+        "cp",
+        "fbs",
+        "restecg",
+        "exang",
+        "slope",
+        "ca",
+        "thal"
+    ],
+    "logistic_regression_metrics": {
+        "test_accuracy": 0.8688524590163934,
+        "test_precision": 0.8333333333333334,
+        "test_recall": 0.8928571428571429,
+        "test_f1": 0.8620689655172413,
+        "test_roc_auc": 0.9621212121212122
+    },
+    "random_forest_metrics": {
+        "test_accuracy": 0.8852459016393442,
+        "test_precision": 0.8387096774193549,
+        "test_recall": 0.9285714285714286,
+        "test_f1": 0.8813559322033898,
+        "test_roc_auc": 0.9415584415584415
+    },
+    "champion_metrics": {
+        "test_accuracy": 0.8688524590163934,
+        "test_precision": 0.8333333333333334,
+        "test_recall": 0.8928571428571429,
+        "test_f1": 0.8620689655172413,
+        "test_roc_auc": 0.9621212121212122
+    }
+}
