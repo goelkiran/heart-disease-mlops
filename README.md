@@ -5,11 +5,13 @@
 [![Docker](https://img.shields.io/badge/docker-containerized-blue.svg)](https://www.docker.com/)
 [![Kubernetes](https://img.shields.io/badge/k8s-deployed-326CE5.svg)](https://kubernetes.io/)
 [![MLflow](https://img.shields.io/badge/MLflow-Tracking-0194E2.svg)](https://mlflow.org/)
+[![Video Walkthrough](https://img.shields.io/badge/YouTube-Video%20Demo-red.svg)](https://youtu.be/xuVtBHqhxbM)
 
 **Student Name**: Kiran Kumar  
 **Student ID**: `2025AE05377`  
 **Course**: Machine Learning Operations (AIML ZG523) — Assignment 01  
 **Dataset**: UCI Heart Disease Repository (Cleveland Clinic Database)  
+**Video Walkthrough**: [https://youtu.be/xuVtBHqhxbM](https://youtu.be/xuVtBHqhxbM)  
 
 ---
 

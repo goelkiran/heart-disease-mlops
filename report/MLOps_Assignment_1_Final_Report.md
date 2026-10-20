@@ -6,7 +6,7 @@
 **Student ID**: `2025AE05377`  
 **Submission Date**: October 2026  
 **Repository URL**: [https://github.com/goelkiran/heart-disease-mlops](https://github.com/goelkiran/heart-disease-mlops)  
-**Video Demonstration Walkthrough Link**: [Click to Watch Video Walkthrough](https://drive.google.com/file/d/YOUR_RECORDING_LINK/view?usp=sharing)  
+**Video Demonstration Walkthrough Link**: [Click to Watch Video Walkthrough (YouTube)](https://youtu.be/xuVtBHqhxbM)  
 **API Serving Target**: `http://localhost:8000` (Docker Container / Kubernetes Service)  
 
 ---
