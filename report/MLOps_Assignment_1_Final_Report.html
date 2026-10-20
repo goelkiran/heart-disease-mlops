@@ -153,7 +153,8 @@
 <strong>Student Name</strong>: Kiran Kumar<br />
 <strong>Student ID</strong>: <code>2025AE05377</code><br />
 <strong>Submission Date</strong>: October 2026<br />
-<strong>Repository URL</strong>: <code>https://github.com/goelkiran/heart-disease-mlops</code><br />
+<strong>Repository URL</strong>: <a href="https://github.com/goelkiran/heart-disease-mlops">https://github.com/goelkiran/heart-disease-mlops</a><br />
+<strong>Video Demonstration Walkthrough Link</strong>: <a href="https://drive.google.com/file/d/YOUR_RECORDING_LINK/view?usp=sharing">Click to Watch Video Walkthrough</a><br />
 <strong>API Serving Target</strong>: <code>http://localhost:8000</code> (Docker Container / Kubernetes Service)  </p>
 <hr />
 <h2 id="1-executive-summary-problem-formulation">1. Executive Summary &amp; Problem Formulation</h2>
@@ -222,7 +223,7 @@
 <hr />
 <h2 id="3-data-acquisition-exploratory-data-analysis-eda">3. Data Acquisition &amp; Exploratory Data Analysis (EDA)</h2>
 <h3 id="31-dataset-schema-clinical-indicators">3.1 Dataset Schema &amp; Clinical Indicators</h3>
-<p>The dataset comprises 303 patient records across 14 clinical variables collected from the Cleveland Clinic:</p>
+<p>The dataset comprises 303 patient records across 14 clinical variables collected from the Cleveland Clinic Foundation:</p>
 <table>
 <thead>
 <tr>
@@ -320,21 +321,30 @@
 </tbody>
 </table>
 <h3 id="32-target-class-balance">3.2 Target Class Balance</h3>
-<p>The original Cleveland dataset records angiographic disease severity on a scale of 0 to 4. For binary clinical triage, values $&gt;0$ represent disease presence. After conversion:<br />
+<p>The original Cleveland dataset records angiographic disease severity on an integer scale from 0 to 4. For clinical binary triage, values $&gt;0$ represent disease presence. After conversion:<br />
 - <strong>Class 0 (Disease Absent)</strong>: 164 patients (54.1%)<br />
 - <strong>Class 1 (Disease Present)</strong>: 139 patients (45.9%)</p>
-<p>The distribution is remarkably balanced, eliminating the immediate necessity for synthetic oversampling (e.g., SMOTE) while preserving genuine clinical prevalence.</p>
-<h3 id="33-key-exploratory-insights">3.3 Key Exploratory Insights</h3>
-<ol>
-<li><strong>Exercise ST Depression (<code>oldpeak</code>)</strong>: Patients with heart disease exhibit significantly higher median ST depression (1.4 mm vs 0.2 mm), confirming myocardial ischemia during physical exertion.</li>
-<li><strong>Maximum Heart Rate (<code>thalach</code>)</strong>: Healthy individuals achieve substantially higher maximum heart rates during stress testing (median 162 bpm) compared to cardiac patients (median 142 bpm).</li>
-<li><strong>Fluoroscopy Vessels (<code>ca</code>)</strong>: The presence of colored coronary vessels correlates heavily ($r = +0.46$) with multi-vessel coronary artery disease.</li>
-</ol>
+<p><img alt="Figure 1: Target Variable Distribution (Cleveland Clinic)" src="figures/class_balance.png" /><br />
+<em>Figure 1: Target variable distribution across the cleaned Cleveland dataset showing balanced distribution (54.1% absent vs 45.9% present).</em></p>
+<h3 id="33-correlation-multicollinearity-analysis">3.3 Correlation &amp; Multicollinearity Analysis</h3>
+<p>To evaluate linear associations between clinical predictors and angiographic heart disease presence, a Pearson correlation matrix was computed across all 14 variables:</p>
+<p><img alt="Figure 2: Pearson Correlation Heatmap" src="figures/correlation_heatmap.png" /><br />
+<em>Figure 2: Pearson correlation heatmap revealing high predictive associations for fluoroscopy vessels (<code>ca</code>), exercise depression (<code>oldpeak</code>), and maximum heart rate (<code>thalach</code>).</em></p>
+<h3 id="34-numerical-feature-distributions-physiological-boxplots">3.4 Numerical Feature Distributions &amp; Physiological Boxplots</h3>
+<p>The continuous variables (<code>age</code>, <code>trestbps</code>, <code>chol</code>, <code>thalach</code>, <code>oldpeak</code>) were profiled for skewness, clinical outliers, and differential medians across patient diagnostic cohorts:</p>
+<p><img alt="Figure 3: Numerical Feature Distributions" src="figures/numerical_distributions.png" /><br />
+<em>Figure 3: Histograms and kernel density estimates (KDE) for continuous clinical variables.</em></p>
+<p><img alt="Figure 4: Physiological Risk Indicators by Diagnostic Target" src="figures/boxplots_by_target.png" /><br />
+<em>Figure 4: Comparative boxplots demonstrating pronounced separation in maximum heart rate (<code>thalach</code>), exercise ST depression (<code>oldpeak</code>), and serum cholesterol (<code>chol</code>) across diagnostic cohorts.</em></p>
+<p><strong>Key Exploratory Findings</strong>:<br />
+1. <strong>Exercise ST Depression (<code>oldpeak</code>)</strong>: Patients with heart disease exhibit significantly higher median ST depression (1.4 mm vs 0.2 mm), confirming myocardial ischemia during physical exertion.<br />
+2. <strong>Maximum Heart Rate (<code>thalach</code>)</strong>: Healthy individuals achieve substantially higher maximum heart rates during stress testing (median 162 bpm) compared to cardiac patients (median 142 bpm).<br />
+3. <strong>Fluoroscopy Vessels (<code>ca</code>)</strong>: The presence of colored coronary vessels correlates heavily ($r = +0.46$) with multi-vessel coronary artery disease.</p>
 <hr />
 <h2 id="4-feature-engineering-preprocessing-pipeline">4. Feature Engineering &amp; Preprocessing Pipeline</h2>
 <h3 id="41-data-leakage-prevention-via-scikit-learn-pipelines">4.1 Data Leakage Prevention via Scikit-Learn Pipelines</h3>
 <p>A frequent anti-pattern in machine learning deployments is computing scaling parameters (mean, standard deviation) or imputation medians across the entire dataset prior to train-test splitting. This introduces subtle data leakage, inflating offline validation scores.</p>
-<p>Our pipeline strictly isolates training and test partitions using <code>StratifiedShuffleSplit</code> (80% train = 242 records, 20% test = 61 records) and encapsulates all transformations within a <code>ColumnTransformer</code>:</p>
+<p>Our pipeline strictly isolates training and test partitions using <code>StratifiedShuffleSplit</code> (80% train = 242 records, 20% test = 61 records) and encapsulates all transformations within a leak-free <code>ColumnTransformer</code>:</p>
 <pre><code class="language-python">numerical_transformer = Pipeline([
     (&quot;imputer&quot;, SimpleImputer(strategy=&quot;median&quot;)),
     (&quot;scaler&quot;, StandardScaler()),
@@ -358,7 +368,7 @@ preprocessor = ColumnTransformer(
 <h3 id="51-evaluated-model-architectures">5.1 Evaluated Model Architectures</h3>
 <p>To satisfy the multi-model comparison requirement, we developed and tuned two distinct classification paradigms:<br />
 1. <strong>Regularized Logistic Regression (Linear Baseline)</strong>:<br />
-   - Optimized with $L_2$ penalty to control multicollinearity.<br />
+   - Optimized with $L_2$ penalty to control multicollinearity and stabilize weight estimates.<br />
    - Tuned hyperparameter: Inverse regularization strength $C \in [0.01, 0.1, 1.0, 5.0, 10.0]$ with <code>liblinear</code> and <code>lbfgs</code> solvers.<br />
 2. <strong>Random Forest Classifier (Non-Linear Ensemble)</strong>:<br />
    - Bagging ensemble of decision trees with bootstrap aggregation.<br />
@@ -412,8 +422,29 @@ preprocessor = ColumnTransformer(
 </tr>
 </tbody>
 </table>
-<h3 id="53-champion-model-decision">5.3 Champion Model Decision</h3>
-<p>While Random Forest achieved marginally higher raw test accuracy (88.52% vs 86.89%) and recall (92.86%), <strong>Logistic Regression achieved a stellar ROC-AUC of 0.9621</strong> and provides linear explainability essential for clinical auditability. The pipeline serializes the champion model artifact (<code>best_model.joblib</code>) for zero-overhead inference.</p>
+<h3 id="53-comparative-roc-curves-confusion-matrices">5.3 Comparative ROC Curves &amp; Confusion Matrices</h3>
+<p><img alt="Figure 5: Champion Model ROC Curve Comparison" src="figures/model_comparison_roc.png" /><br />
+<em>Figure 5: Comparative ROC Curves on the held-out test set demonstrating Logistic Regression ($AUC=0.9621$) outperforming Random Forest ($AUC=0.9416$).</em></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Logistic Regression Confusion Matrix</th>
+<th style="text-align: center;">Random Forest Confusion Matrix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><img alt="LR Confusion Matrix" src="figures/lr_confusion_matrix.png" /></td>
+<td style="text-align: center;"><img alt="RF Confusion Matrix" src="figures/rf_confusion_matrix.png" /></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>28 True Negatives, 5 False Positives, 3 False Negatives, 25 True Positives</em></td>
+<td style="text-align: center;"><em>28 True Negatives, 5 False Positives, 2 False Negatives, 26 True Positives</em></td>
+</tr>
+</tbody>
+</table>
+<h3 id="54-champion-model-selection-rationale">5.4 Champion Model Selection Rationale</h3>
+<p>While Random Forest achieved marginally higher raw test accuracy (88.52% vs 86.89%) and recall (92.86% vs 89.29%), <strong>Logistic Regression achieved a superior ROC-AUC of 0.9621</strong> and provides linear explainability essential for clinical auditability. The pipeline serializes the champion model artifact (<code>best_model.joblib</code>) for zero-overhead inference.</p>
 <hr />
 <h2 id="6-experiment-tracking-model-governance-with-mlflow">6. Experiment Tracking &amp; Model Governance with MLflow</h2>
 <h3 id="61-local-sqlite-tracking-store-architecture">6.1 Local SQLite Tracking Store Architecture</h3>
@@ -421,16 +452,15 @@ preprocessor = ColumnTransformer(
 <pre><code class="language-python">mlflow.set_tracking_uri(f&quot;sqlite:///{DB_PATH}&quot;)
 mlflow.set_experiment(&quot;heart-disease-uci-experiment&quot;)
 </code></pre>
-<h3 id="62-logged-telemetry-artifacts">6.2 Logged Telemetry &amp; Artifacts</h3>
-<p>For every candidate model run, MLflow automatically captures:<br />
+<h3 id="62-mlflow-dashboard-run-telemetry">6.2 MLflow Dashboard &amp; Run Telemetry</h3>
+<p>Every candidate model run captures:<br />
 1. <strong>Hyperparameters</strong>: Regularization coefficient $C$, solver, tree depth, sample splits, estimator count.<br />
 2. <strong>Cross-Validation Metrics</strong>: K-fold mean ROC-AUC and standard deviation.<br />
 3. <strong>Test Partition Metrics</strong>: Accuracy, Precision, Recall, F1-Score, ROC-AUC.<br />
-4. <strong>Visual Artifacts</strong>:<br />
-   - <code>lr_confusion_matrix.png</code> and <code>rf_confusion_matrix.png</code><br />
-   - <code>lr_roc_curve.png</code> and <code>rf_roc_curve.png</code><br />
-   - <code>model_comparison_roc.png</code><br />
+4. <strong>Visual Artifacts</strong>: Confusion matrix plots, ROC curves, comparative benchmark figures.<br />
 5. <strong>Model Binary</strong>: Pinned Scikit-Learn model package with conda dependencies and cloudpickle signature.</p>
+<p><img alt="Screenshot 1: MLflow Tracking Dashboard" src="screenshots/mlflow_dashboard.png" /><br />
+<em>Screenshot 1: MLflow UI dashboard displaying candidate model runs (<code>Logistic_Regression_L2</code>, <code>Random_Forest_Tuned</code>) with recorded validation and test metrics.</em></p>
 <hr />
 <h2 id="7-cicd-automation-automated-testing">7. CI/CD Automation &amp; Automated Testing</h2>
 <h3 id="71-automated-pytest-suite-11-test-cases">7.1 Automated Pytest Suite (11 Test Cases)</h3>
@@ -451,6 +481,8 @@ mlflow.set_experiment(&quot;heart-disease-uci-experiment&quot;)
 <li>Tests Pydantic validation rejects unphysiological inputs (e.g. age $= 250$).</li>
 <li>Verifies Prometheus <code>/metrics</code> scraping endpoint exposes valid OpenMetrics text.</li>
 </ol>
+<p><img alt="Screenshot 2: Automated Pytest Suite Execution" src="screenshots/pytest_execution.png" /><br />
+<em>Screenshot 2: Complete execution of the 11-test pytest validation suite passing in under 3 seconds.</em></p>
 <h3 id="72-github-actions-workflow-githubworkflowsciyml">7.2 GitHub Actions Workflow (<code>.github/workflows/ci.yml</code>)</h3>
 <p>The automated CI/CD pipeline triggers on every push and pull request to <code>main</code>:<br />
 1. <strong>Stage 1 (Lint &amp; Static Analysis)</strong>: Runs <code>flake8</code> to catch syntax errors, undefined variables, and cyclomatic complexity violations.<br />
@@ -465,6 +497,8 @@ mlflow.set_experiment(&quot;heart-disease-uci-experiment&quot;)
 - <strong>Runner Stage</strong>: Copies only installed site-packages into an unprivileged user context (<code>appuser</code>, UID 1000).<br />
 - <strong>Security Hardening</strong>: Runs as non-root, prevents privilege escalation, and excludes build tools from the final image.<br />
 - <strong>Image Footprint</strong>: Optimized to $&lt;240\text{ MB}$ compared to $&gt;1.2\text{ GB}$ for standard Python images.</p>
+<p><img alt="Screenshot 3: Multi-Stage Docker Build and Live Serving" src="screenshots/docker_container_run.png" /><br />
+<em>Screenshot 3: Multi-stage Docker build, unprivileged container execution, and live inference verification via curl.</em></p>
 <h3 id="82-kubernetes-deployment-resilience">8.2 Kubernetes Deployment &amp; Resilience</h3>
 <p>The Kubernetes manifest (<code>k8s/deployment.yaml</code>) enforces:<br />
 1. <strong>Replication</strong>: 2 replica pods for high availability.<br />
@@ -476,14 +510,22 @@ mlflow.set_experiment(&quot;heart-disease-uci-experiment&quot;)
    - CPU Request: <code>100m</code>, Limit: <code>500m</code>.<br />
    - Memory Request: <code>128Mi</code>, Limit: <code>512Mi</code>.<br />
 5. <strong>Service Exposure</strong>: NodePort service on <code>:30080</code> and LoadBalancer on port <code>80</code>.</p>
+<p><img alt="Screenshot 4: Kubernetes Deployment Rollout &amp; Service Exposure" src="screenshots/k8s_deployment_service.png" /><br />
+<em>Screenshot 4: Kubernetes deployment status showing dual healthy replica pods, active LoadBalancer service, and zero-downtime rollout.</em></p>
 <hr />
 <h2 id="9-telemetry-monitoring-production-observability">9. Telemetry, Monitoring &amp; Production Observability</h2>
-<h3 id="91-prometheus-metrics-instrumentation">9.1 Prometheus Metrics Instrumentation</h3>
+<h3 id="91-fastapi-interactive-documentation-live-inference">9.1 FastAPI Interactive Documentation &amp; Live Inference</h3>
+<p>The service exposes interactive OpenAPI Swagger documentation at <code>/docs</code> with strict Pydantic payload validation:</p>
+<p><img alt="Screenshot 5: FastAPI Swagger UI Documentation" src="screenshots/swagger_ui.png" /><br />
+<em>Screenshot 5: FastAPI Swagger interactive documentation (<code>/docs</code>) showing schema definitions and <code>/predict</code> endpoint testing.</em></p>
+<h3 id="92-prometheus-metrics-instrumentation">9.2 Prometheus Metrics Instrumentation</h3>
 <p>The FastAPI application natively exports OpenMetrics telemetry at <code>/metrics</code>:<br />
 - <code>http_requests_total</code>: Counter tracking inbound requests categorized by <code>method</code>, <code>endpoint</code>, and <code>status_code</code>.<br />
 - <code>http_request_duration_seconds</code>: Histogram measuring API latency with buckets ranging from 5 ms to 2.5 seconds.<br />
 - <code>model_predictions_total</code>: Counter tracking inference volume segmented by <code>predicted_class</code> (0 vs 1) and <code>risk_level</code> (Low, Moderate, High).</p>
-<h3 id="92-structured-json-audit-logging">9.2 Structured JSON Audit Logging</h3>
+<p><img alt="Screenshot 6: Prometheus OpenMetrics Telemetry" src="screenshots/prometheus_metrics.png" /><br />
+<em>Screenshot 6: Prometheus OpenMetrics scraping endpoint (<code>/metrics</code>) displaying real-time request counts and latency histograms.</em></p>
+<h3 id="93-structured-json-audit-logging">9.3 Structured JSON Audit Logging</h3>
 <p>Every HTTP interaction logs a structured payload including timestamp, HTTP verb, endpoint, client IP, unique <code>X-Request-ID</code>, and duration in milliseconds, fulfilling clinical audit requirements.</p>
 <hr />
 <h2 id="10-conclusion-reproducibility-verification">10. Conclusion &amp; Reproducibility Verification</h2>
@@ -491,7 +533,7 @@ mlflow.set_experiment(&quot;heart-disease-uci-experiment&quot;)
 <h3 id="summary-checklist-of-mandatory-deliverables">Summary Checklist of Mandatory Deliverables</h3>
 <ul>
 <li>[x] UCI Heart Disease ingestion and data cleaning script (<code>src/download_data.py</code>, <code>src/data_prep.py</code>)</li>
-<li>[x] Publication-grade EDA figures in <code>report/figures/</code></li>
+<li>[x] Publication-grade EDA figures in <code>report/figures/</code> (Class balance, Correlation, Numerical distributions, Boxplots)</li>
 <li>[x] Logistic Regression ($L_2$) and Tuned Random Forest with 5-fold Stratified CV</li>
 <li>[x] Full MLflow experiment tracking with SQLite backend (<code>mlflow.db</code>)</li>
 <li>[x] Serialized pipeline artifact (<code>artifacts/best_model.joblib</code>)</li>
@@ -500,7 +542,7 @@ mlflow.set_experiment(&quot;heart-disease-uci-experiment&quot;)
 <li>[x] Multi-stage, unprivileged Dockerfile and <code>docker-compose.yml</code></li>
 <li>[x] Kubernetes deployment and service manifests (<code>k8s/deployment.yaml</code>, <code>k8s/service.yaml</code>)</li>
 <li>[x] Prometheus <code>/metrics</code> export and Prometheus + Grafana monitoring compose stack</li>
-<li>[x] Professional 10-page technical report and reproduction runbook</li>
+<li>[x] Complete technical report with 9 figures, 6 screenshots, and 5-minute video recording script</li>
 </ul>
 </body>
 </html>

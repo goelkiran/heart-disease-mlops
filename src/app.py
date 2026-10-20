@@ -7,6 +7,8 @@ AIML ZG523 - MLOps Assignment 1
 import logging
 import time
 import uuid
+import sys
+from pathlib import Path
 from typing import List, Optional
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,7 +16,14 @@ from pydantic import BaseModel, Field
 import prometheus_client
 from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
 
-from pipeline import HeartDiseasePredictor, FEATURE_COLUMNS
+SRC_DIR = Path(__file__).resolve().parent
+if str(SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(SRC_DIR))
+
+try:
+    from pipeline import HeartDiseasePredictor, FEATURE_COLUMNS
+except ImportError:
+    from src.pipeline import HeartDiseasePredictor, FEATURE_COLUMNS
 
 # Configure structured logging
 logging.basicConfig(

@@ -4,13 +4,30 @@ Generates publication-quality visualizations for the Heart Disease UCI dataset.
 AIML ZG523 - MLOps Assignment 1
 """
 
+import sys
 from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+# Path resolution & Single Source of Truth import from data_prep
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+try:
+    from data_prep import NUMERICAL_COLS
+except ImportError:
+    from src.data_prep import NUMERICAL_COLS
+
 FIGURES_DIR = Path(__file__).resolve().parent.parent / "report" / "figures"
 PROCESSED_DATA_PATH = Path(__file__).resolve().parent.parent / "data" / "processed" / "heart_cleaned.csv"
+
+# ==============================================================================
+# Semantic Design Tokens / Color Palette
+# ==============================================================================
+COLOR_ABSENCE = "#2b5c8f"        # Deep Steel Blue: Absence of disease (Class 0)
+COLOR_PRESENCE = "#d95f02"       # Burnt Orange: Presence of disease (Class 1)
+COLOR_ABSENCE_LIGHT = "#7ea6c9"  # Muted Blue: Boxplot fill
+COLOR_PRESENCE_LIGHT = "#e59866" # Muted Orange: Boxplot fill
+CLASS_COLORS = [COLOR_ABSENCE, COLOR_PRESENCE]
 
 
 def setup_plotting_style():
@@ -35,8 +52,7 @@ def generate_eda_figures():
     fig, ax = plt.subplots(figsize=(7, 5))
     counts = df["target"].value_counts().sort_index()
     labels = ["Absence (0)", "Presence (1)"]
-    colors = ["#2b5c8f", "#d95f02"]
-    bars = ax.bar(labels, counts.values, color=colors, width=0.55, edgecolor="black", linewidth=1.2)
+    bars = ax.bar(labels, counts.values, color=CLASS_COLORS, width=0.55, edgecolor="black", linewidth=1.2)
 
     for bar in bars:
         yval = bar.get_height()
@@ -86,18 +102,17 @@ def generate_eda_figures():
     plt.close()
     print(f"[+] Saved {fig2_path}")
 
-    # 3. Numerical Feature Histograms & Distributions by Class
-    num_features = ["age", "trestbps", "chol", "thalach", "oldpeak"]
+    # 3. Numerical Feature Histograms & Distributions by Class (Single Source of Truth)
     fig, axes = plt.subplots(2, 3, figsize=(15, 9))
     axes = axes.flatten()
 
-    for idx, feature in enumerate(num_features):
+    for idx, feature in enumerate(NUMERICAL_COLS):
         ax = axes[idx]
         df[df["target"] == 0][feature].hist(
-            ax=ax, bins=15, alpha=0.6, color="#2b5c8f", label="Absence (0)", edgecolor="black"
+            ax=ax, bins=15, alpha=0.6, color=COLOR_ABSENCE, label="Absence (0)", edgecolor="black"
         )
         df[df["target"] == 1][feature].hist(
-            ax=ax, bins=15, alpha=0.6, color="#d95f02", label="Presence (1)", edgecolor="black"
+            ax=ax, bins=15, alpha=0.6, color=COLOR_PRESENCE, label="Presence (1)", edgecolor="black"
         )
         ax.set_title(f"Distribution of {feature.upper()}", fontweight="bold", fontsize=11)
         ax.set_xlabel(feature, fontsize=10)
@@ -130,8 +145,8 @@ def generate_eda_figures():
             tick_labels=["Absence (0)", "Presence (1)"],
             medianprops=dict(color="black", linewidth=1.5),
         )
-        bplot["boxes"][0].set_facecolor("#7ea6c9")
-        bplot["boxes"][1].set_facecolor("#e59866")
+        bplot["boxes"][0].set_facecolor(COLOR_ABSENCE_LIGHT)
+        bplot["boxes"][1].set_facecolor(COLOR_PRESENCE_LIGHT)
         ax.set_title(title, fontweight="bold", fontsize=11)
         ax.set_ylabel(unit, fontsize=10)
 

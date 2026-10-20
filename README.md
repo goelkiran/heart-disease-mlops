@@ -17,37 +17,38 @@
 
 ```mermaid
 flowchart TD
-    subgraph S1["1. Data Acquisition & Processing"]
-        UCI["UCI Data Repo"] -->|"download_data.py"| Raw["data/raw/heart.csv"]
+    subgraph S1["1. Data Ingestion & Preprocessing"]
+        UCI["UCI Data Repo (Cleveland)"] -->|"download_data.py"| Raw["data/raw/heart.csv"]
         Raw -->|"data_prep.py"| Clean["data/processed/heart_cleaned.csv"]
         Clean -->|"Stratified 80/20"| Split["Train / Test Splits"]
     end
 
     subgraph S2["2. Experimentation & Model Governance"]
-        Split -->|"GridSearchCV"| Tuning["Hyperparameter Search"]
+        Split -->|"GridSearchCV (5-Fold CV)"| Tuning["Hyperparameter Search"]
         Tuning --> Mod1["Logistic Regression (L2)"]
         Tuning --> Mod2["Random Forest (100 Trees)"]
-        Mod1 & Mod2 -->|"Metrics & Plots"| MLflow[("SQLite MLflow Registry (mlflow.db)")]
-        MLflow -->|"Champion Promotion"| Art["artifacts/best_model.joblib"]
+        Mod1 & Mod2 -->|"CV Metrics & Confusion Matrix"| MLflow[("SQLite MLflow Registry<br/>(mlflow.db)")]
+        MLflow -->|"Champion Selection (AUC: 0.962)"| Art["artifacts/best_model.joblib"]
     end
 
     subgraph S3["3. Testing & CI/CD Pipeline"]
-        Code["Code Commit"] -->|"GitHub Actions"| CI["Linting (flake8) + Pytest (11 Tests)"]
+        Art -->|"Push Code & Model"| Code["Git Commit / PR to main"]
+        Code -->|"GitHub Actions CI"| CI["Linting (flake8) + Pytest (11 Tests)"]
         CI --> Smoke["Train Smoke Test"]
         Smoke --> Img["Docker Image Build Verification"]
     end
 
     subgraph S4["4. Serving & Production Orchestration"]
-        Art --> Docker["Multi-Stage Docker Image (heart-disease-api)"]
-        Docker --> K8s["Kubernetes Cluster (Minikube / Cloud)"]
+        Img -->|"Deploy Verified Image"| Docker["Multi-Stage Docker Image<br/>(heart-disease-api)"]
+        Docker --> K8s["Kubernetes Deployment<br/>(2 Replicas, RollingUpdate)"]
         K8s --> Svc["LoadBalancer Service (:80 / :8000)"]
-        Svc --> Client["Clinician / Web Client"]
+        Client["Clinician / Web Client<br/>(Swagger UI /docs)"] <-->|"REST API /predict"| Svc
     end
 
     subgraph S5["5. Observability & Telemetry"]
-        Svc -->|"Prometheus Scrape (/metrics)"| Prom[("Prometheus TSDB")]
-        Prom --> Graf["Grafana Dashboard"]
-        Svc -->|"JSON Audit Logs"| Logs["stdout / CloudWatch"]
+        Svc -->|"Prometheus Scrape (/metrics)"| Prom[("Prometheus TSDB (:9090)")]
+        Prom --> Graf["Grafana Dashboard (:3000)"]
+        Svc -->|"JSON Audit Logs"| Logs["stdout / CloudWatch<br/>(X-Request-ID)"]
     end
 ```
 
